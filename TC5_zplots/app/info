@@ -1,0 +1,11 @@
+Title: Daily gene expression of the Florida Carpenter ants. 
+Version: 0.1
+Date: 2020-04-11
+Author: Biplabendu Das
+Maintainer: Biplabendu Das <biplabendu.das@ucf.edu>
+Description: This app visualizes diurnal gene expression for the florida carpenter ants (foragers vs. nurses).
+Category: Transcriptomics
+Keywords: Ants, RNASeq, Biological Rhythms, Timeseries
+License: MIT
+Depends: shiny, shinythemes, dplyr, plotly, conflicted
+Command: <NA>
