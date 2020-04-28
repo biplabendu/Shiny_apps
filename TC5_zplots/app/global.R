@@ -10,12 +10,20 @@ conflict_prefer("layout", "plotly")
 
 
 # Your function here ------------------------------------------------------
-
+### Data
+## load core dataset
 load(file = "./data/TC5_core_datasets.RData")
 load(file = "./data/ejtk.RData")
+## load eJTK results
+# for.ejtk <- read.table("~/OneDrive - University of Central Florida/BD-TC5/TC5_Paper/results_csv/rhythmic_genes/eJTK/fpkm/output/for/for_expressed_halftimepoints_cos24_ph00-22_by2_a02-22_by2_test_run_jtkout_GammaP.txt", 
+#                        header = T)
+# nur.ejtk <- read.table("~/OneDrive - University of Central Florida/BD-TC5/TC5_Paper/results_csv/rhythmic_genes/eJTK/fpkm/output/nur/nur_expressed_halftimepoints_cos24_ph00-22_by2_a02-22_by2_test_run_jtkout_GammaP.txt", 
+#                        header = T)
+## load DEG results
 load(file = "./data/cflo_ophio_degs.RData")
-# load(file = ".")
-# my functions
+
+
+### Functions
 # source("~/Documents/GitHub/R-scripts_zombie_ant_lab/Functions/plot_zscores.R")
 # source("~/Documents/GitHub/R-scripts_zombie_ant_lab/Functions/vennDia.R")
 # source("~/Documents/GitHub/R-scripts_zombie_ant_lab/Functions/enrichment_analysis.R")
@@ -301,11 +309,11 @@ log.plot <- function(gene_names, caste = "both", log=T, lwd=2, alpha=0.9) {
   
   if(log==T) {
     
-    log10.exp <- round(log10(dummy[dummy$gene_name==g,]$exp+1),2)
+    log2.exp <- round(log2(dummy[dummy$gene_name==g,]$exp+1),2)
     
     l <- 
       # lapply(sort(unique(dummy[[1]])), function(i) {
-      ggplot(dummy[dummy$gene_name==g,], aes(x=zt, y=log10.exp)) + 
+      ggplot(dummy[dummy$gene_name==g,], aes(x=zt, y=log2.exp)) + 
         #geom_errorbar(aes(ymin=Corrected_Exp-se, ymax=Corrected_Exp+se), width=.1, position=pd) +
         # geom_hline(yintercept=0, color = "red", size = 2) +
         ## if you need highlighting parts of the graph (dark phase in my case)
@@ -478,7 +486,7 @@ cflo.cuffdiff <-
   mutate(treatment_1 = ifelse(sample_1 == "Alive", "Biting", sample_1),
          treatment_2 = ifelse(sample_2 == "Alive", "Biting", sample_2)) %>% 
   select(gene_name = gene, 
-         locus,
+         # locus,
          annotation,
          treatment_1, treatment_2,
          significant,

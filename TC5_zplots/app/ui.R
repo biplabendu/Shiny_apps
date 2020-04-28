@@ -29,7 +29,7 @@ shinyUI(
                # Input: Selector for choosing dataset ----
                selectInput(inputId = "plots",
                            label = "Choose plot type:",
-                           choices = c("Zscores", "log10(exp)", "Raw FPKMs"))),
+                           choices = c("Zscores", "log2(exp)", "Raw FPKMs"))),
                # 
                # # Input: Numeric entry for number of obs to view ----
                # numericInput(inputId = "obs",

@@ -68,7 +68,7 @@ function(input, output, session) {
       g <- z.plot(input$gene)
     }
     
-    else if (input$plots == "log10(exp)"){
+    else if (input$plots == "log2(exp)"){
       g <- log.plot(input$gene, log=T)
     }
     
