@@ -1,26 +1,43 @@
 #### LOAD LIBRARIES #### 
 pacman::p_load(shiny, shinythemes, dplyr, plotly, conflicted, tidyr, ggplot2)
+pacman::p_load(RSQLite, tidyverse, dbplyr, DT)
 
 # set conflict preference
 conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 conflict_prefer("layout", "plotly")
 
-# setwd("./app/")
+setwd("/Users/biplabendudas/Documents/GitHub/Shiny_apps/TC5_zplots/app")
+
+## Load results database -------------
+# load the database for TC5
+db <- dbConnect(RSQLite::SQLite(), "./data/TC5_data.db")
+# src_dbi(db)
+
+## Load blast database ---------------
+blast_db <- dbConnect(RSQLite::SQLite(),"/Users/biplabendudas/Documents/GitHub/R-scripts_zombie_ant_lab/RSQLite/sql_dbs/blast_data.db")
+# src_dbi(blast_db)
+
 
 
 # Your function here ------------------------------------------------------
 ### Data
 ## load core dataset
-load(file = "./data/TC5_core_datasets.RData")
-load(file = "./data/ejtk.RData")
+cflo.annots.exp <- tbl(db, "annot_fpkm") %>% collect()
+
+## load zscore datasets
+cflo.zscores.for <- tbl(db, "zscore_for") %>% collect()
+cflo.zscores.nur <- tbl(db, "zscore_nur") %>% collect()
+
 ## load eJTK results
-# for.ejtk <- read.table("~/OneDrive - University of Central Florida/BD-TC5/TC5_Paper/results_csv/rhythmic_genes/eJTK/fpkm/output/for/for_expressed_halftimepoints_cos24_ph00-22_by2_a02-22_by2_test_run_jtkout_GammaP.txt", 
-#                        header = T)
-# nur.ejtk <- read.table("~/OneDrive - University of Central Florida/BD-TC5/TC5_Paper/results_csv/rhythmic_genes/eJTK/fpkm/output/nur/nur_expressed_halftimepoints_cos24_ph00-22_by2_a02-22_by2_test_run_jtkout_GammaP.txt", 
-#                        header = T)
+for.ejtk <- tbl(db, "ejtk_all") %>% filter(caste=="for") %>% collect()
+nur.ejtk <- tbl(db, "ejtk_all") %>% filter(caste=="nur") %>% collect()
+
 ## load DEG results
-load(file = "./data/cflo_ophio_degs.RData")
+cflo_Ian_cuffdiff <- tbl(db, "ophio_all_DEG") %>% collect()
+
+## sig DEGs for biting vs control
+sig.degs.biting.control <- tbl(db, "ophio_biting_control") %>% collect() %>% pull(gene)
 
 
 ### Functions
@@ -432,48 +449,14 @@ annot <- function(gene) {
 
 
 
-# Results from eJTK -------------------------------------------------------
-
-# eJTK - Run 1 (all genes with non-zero expression) -------------------------------------------------
-
-# for.run1 <- read.table("~/OneDrive - University of Central Florida/BD-TC5/1212LD_24h/eJTK/Results/eJTK_Run1/output/for/tc5_for_cos24_ph00-22_by2_a02-22_by2_OTHERTEXT_jtkout_GammaP.txt", header = T)
-# nur.run1 <- read.table("~/OneDrive - University of Central Florida/BD-TC5/1212LD_24h/eJTK/Results/eJTK_Run1/output/nur/tc5_nur_cos24_ph00-22_by2_a02-22_by2_OTHERTEXT_jtkout_GammaP.txt", header = T)
-
-
-
-# Make the eJTK results into a .RData file --------------------------------
-
-# save(for.run1, nur.run1, 
-#      file = "./app/data/ejtk.RData")
-
-# identify rhythmicity ------------------------------
-pbh.fdr = 0.1
-
-for.pbh <- for.run1 %>% 
-  ## keep the "expressed" genes
-  filter(ID %in% gs1) %>% 
-  ## Do p.adjust
-  mutate(empP_BH = p.adjust(empP, method = "BH")) %>% 
-  mutate(Gamma_BH = p.adjust(GammaP, method = "BH")) %>% 
-  mutate(caste = "for") %>% 
-  dplyr::select(ID, caste, empP, empP_BH, Gamma_BH, Acrophase=Phase, Max_Amp)
-
-nur.pbh <- nur.run1 %>% 
-  ## keep the "expressed" genes
-  filter(ID %in% gs2) %>% 
-  ## Do p.adjust
-  mutate(empP_BH = p.adjust(empP, method = "BH")) %>% 
-  mutate(Gamma_BH = p.adjust(GammaP, method = "BH")) %>% 
-  mutate(caste = "nur") %>% 
-  dplyr::select(ID, caste, empP, empP_BH, Gamma_BH, Acrophase=Phase, Max_Amp)
-
-for.nur.pbh <- rbind(for.pbh, nur.pbh)
+# rhythmicity ------------------------------
 
 rhy.results <- function(gene) {
-  df <- for.nur.pbh %>% 
-    filter(ID %in% gene) %>% 
-    dplyr::select(-1) %>% 
-    mutate("FDR_10%" = ifelse(empP_BH < pbh.fdr, "sig. rhy", "ns"))
+  df <- tbl(db, "ejtk_all") %>% 
+    filter(gene_name %in% gene) %>% 
+    select(-1) %>% 
+    select(caste:GammaP)
+    
   df
 }
 
@@ -498,13 +481,14 @@ cflo.cuffdiff <-
          q_value) %>% 
   arrange(gene_name, treatment_1, treatment_2) %>% 
   mutate_at(c(7), as.numeric) %>% 
-  mutate_if(is.numeric, ~round(., 2)) 
+  mutate_if(is.numeric, ~round(., 2)) %>% 
+  mutate(DEG_biting = ifelse(gene_name %in% sig.degs.biting.control, "yes", "no"))
 
 
 cuffdiff.results <- function(gene) {
   df <- cflo.cuffdiff %>% 
     filter(gene_name %in% gene) %>% 
-    dplyr::select(-1)
+    select(-1)
   df
 }
 
