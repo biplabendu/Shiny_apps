@@ -65,6 +65,34 @@ function(input, output, session) {
                     columnDefs = list(list(width = '400px', targets = c(3,4)))
                     ))
   
+  output$cflo.summary <- DT::renderDataTable({
+    
+    rhy.for <- for.ejtk %>% filter(rhy=="yes") %>% pull(gene_name)
+    rhy.nur <- nur.ejtk %>% filter(rhy=="yes") %>% pull(gene_name)
+    # add degs for-nur
+    # add degs control-biting
+    
+    
+    df <- 
+      cflo.annots.exp %>% 
+      select(gene_name, blast_annotation = old_annotation,
+             GOs, pfams, signalP, TMHMM) %>% 
+      filter(gene_name %in% union(rhy.for, rhy.nur)) %>% 
+      mutate(rhy_for = ifelse(gene_name %in% rhy.for, "yes", "no")) %>% 
+      mutate(rhy_nur = ifelse(gene_name %in% rhy.nur, "yes", "no")) %>% 
+      select(gene_name, blast_annotation, rhy_for, rhy_nur, everything()) %>% 
+      left_join(tbl(blast_db,"dmel") %>%
+                    select(cflo_gene, dmel_name) %>%
+                    collect() %>%
+                    rename(gene_name = cflo_gene) %>% 
+                    distinct(gene_name, dmel_name, .keep_all = T),
+                by=c("gene_name"))
+    
+    df
+  }, options = list(scrollX = TRUE, 
+                    columnDefs = list(list(width = '400px', targets = c(3,4)))
+  ))
+  
   
   
   # # Show the first "n" observations ----

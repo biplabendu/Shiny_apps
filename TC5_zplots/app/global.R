@@ -11,7 +11,7 @@ setwd("/Users/biplabendudas/Documents/GitHub/Shiny_apps/TC5_zplots/app")
 
 ## Load results database -------------
 # load the database for TC5
-db <- dbConnect(RSQLite::SQLite(), "./data/TC5_data.db")
+db <- dbConnect(RSQLite::SQLite(), "/Users/biplabendudas/Documents/GitHub/R-scripts_zombie_ant_lab/RSQLite/sql_dbs/TC5_data.db")
 # src_dbi(db)
 
 ## Load blast database ---------------
@@ -452,10 +452,21 @@ annot <- function(gene) {
 # rhythmicity ------------------------------
 
 rhy.results <- function(gene) {
+  
+  ultra.8h.df <- tbl(db, "ejtk_8h_all") %>% 
+    filter(gene_name %in% gene) %>% 
+    select(gene_name, caste, GammaP_8h = GammaP)
+  
+  ultra.12h.df <- tbl(db, "ejtk_12h_all") %>% 
+    filter(gene_name %in% gene) %>% 
+    select(gene_name, caste, GammaP_12h = GammaP)
+  
   df <- tbl(db, "ejtk_all") %>% 
     filter(gene_name %in% gene) %>% 
-    select(-1) %>% 
-    select(caste:GammaP)
+    select(gene_name, caste:GammaP) %>% 
+    left_join(ultra.8h.df, by=c("gene_name","caste")) %>% 
+    left_join(ultra.12h.df, by=c("gene_name","caste")) %>% 
+    select(-1)
     
   df
 }

@@ -126,6 +126,25 @@ shinyUI(
                  
                )
             )
+      ),
+    
+    tabPanel("Cflo_annots",
+             
+             includeCSS("www/custom.css"),
+             
+             # Sidebar
+             sidebarLayout(
+               sidebarPanel(
+                 width = 1),
+               
+               # Main panel for displaying outputs ----
+               mainPanel(
+                 
+                 # # Output: HTML table with requested number of observations ----
+                 DT::dataTableOutput("cflo.summary", width = "120%")
+                 
+               )
+             )
       )
   )
 )
