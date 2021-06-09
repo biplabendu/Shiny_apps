@@ -1,0 +1,12 @@
+name: CFlo_Daily_Gene_Expression
+title: CFlo_Daily_Gene_Expression
+username:
+account: biplabendu
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4245163
+bundleId: 4693745
+url: https://biplabendu.shinyapps.io/CFlo_Daily_Gene_Expression/
+when: 1623184468.93582
+asMultiple: FALSE
+asStatic: FALSE

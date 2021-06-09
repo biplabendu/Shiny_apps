@@ -1,21 +1,42 @@
 #### LOAD LIBRARIES #### 
-pacman::p_load(shiny, shinythemes, dplyr, plotly, conflicted, tidyr, ggplot2)
-pacman::p_load(RSQLite, tidyverse, dbplyr, DT)
+
+rm(list = ls())
+
+# if (!require("pacman")) install.packages("pacman")
+library(pacman)
+# pacman::p_load(shiny, shinythemes, dplyr, plotly, conflicted, tidyr, ggplot2)
+# pacman::p_load(RSQLite, tidyverse, dbplyr, DT)
+library(shiny)
+library(shinythemes)
+library(dplyr)
+library(plotly)
+library(conflicted)
+library(tidyr)
+library(ggplot2)
+library(RSQLite)
+library(tidyverse)
+library(dbplyr)
+library(DT)
+
+# Libraries used for plotting
+library(grid)
+library(ggthemes)
+library(scales)
+
+
 
 # set conflict preference
 conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 conflict_prefer("layout", "plotly")
 
-setwd("/Users/biplabendudas/Documents/GitHub/Shiny_apps/TC5_zplots/app")
-
 ## Load results database -------------
 # load the database for TC5
-db <- dbConnect(RSQLite::SQLite(), "/Users/biplabendudas/Documents/GitHub/R-scripts_zombie_ant_lab/RSQLite/sql_dbs/TC5_data.db")
+db <- dbConnect(RSQLite::SQLite(), "./data/TC5_data.db")
 # src_dbi(db)
 
 ## Load blast database ---------------
-blast_db <- dbConnect(RSQLite::SQLite(),"/Users/biplabendudas/Documents/GitHub/R-scripts_zombie_ant_lab/RSQLite/sql_dbs/blast_data.db")
+blast_db <- dbConnect(RSQLite::SQLite(),"./data/blast_data.db")
 # src_dbi(blast_db)
 
 
@@ -104,7 +125,7 @@ bg.genes = unique(c(dat.f %>% pull(gene_name),
 
 
 # Function to plot z-scores
-z.plot <- function(gene_names, caste = "both", lwd=1.5, alpha=0.9) {
+z.plot <- function(gene_names, caste = "both", lwd=2, alpha=0.9) {
   # load the required libraries
   # library(tidyverse)
   # library(gridExtra)
@@ -463,7 +484,7 @@ rhy.results <- function(gene) {
   
   df <- tbl(db, "ejtk_all") %>% 
     filter(gene_name %in% gene) %>% 
-    select(gene_name, caste:GammaP) %>% 
+    select(gene_name, caste, Mean, Std_Dev, GammaP_24h = GammaP) %>% 
     left_join(ultra.8h.df, by=c("gene_name","caste")) %>% 
     left_join(ultra.12h.df, by=c("gene_name","caste")) %>% 
     select(-1)
